@@ -1,8 +1,13 @@
 package com.challenge.code.car;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,36 +18,86 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin(origins = "http://localhost:8081")
 @RestController
-@RequestMapping(path = "/api/v1/car")
+@RequestMapping("/api/v1/car")
 public class CarController {
-
-    private final CarService carService;
-
     @Autowired
-    public CarController(CarService carService) {
-        this.carService = carService;
+    CarRepository carRepository;
+
+    @GetMapping("/cars")
+    public ResponseEntity<List<Car>> getAllCars(@RequestParam(required = false) String plate) {
+        try {
+            List<Car> cars = new ArrayList<Car>();
+
+            if (plate == null)
+                carRepository.findAll().forEach(cars::add);
+            else
+                carRepository.findCarByPlate(plate).forEach(cars::add);
+
+            if (cars.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(cars, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @GetMapping
-    public List<Car> getCars() {
-        return carService.getCars();
+    @GetMapping("/cars/{id}")
+    public ResponseEntity<Car> getCarById(@PathVariable("id") long id) {
+        Optional<Car> carData = carRepository.findById(id);
+
+        if (carData.isPresent()) {
+            return new ResponseEntity<>(carData.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PostMapping
-    public void registerNewCar(@RequestBody Car car) {
-        carService.addNewCar(car);
+    @PostMapping("/cars")
+    public ResponseEntity<Car> createCar(@RequestBody Car car) {
+        try {
+            Car _car = carRepository
+                    .save(new Car(car.getPlate(), car.getColor(), car.getModel(), car.getBrand(), car.getChassis()));
+            return new ResponseEntity<>(_car, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @DeleteMapping(path = "{carId}")
-    public void deleteCar(@PathVariable("carId") Long carId) {
-        carService.deleteCar(carId);
+    @PutMapping("/cars/{id}")
+    public ResponseEntity<Car> updateCar(@PathVariable("id") long id, @RequestBody Car car) {
+        Optional<Car> carData = carRepository.findById(id);
+
+        if (carData.isPresent()) {
+            Car _car = carData.get();
+            _car.setColor(car.getColor());
+            return new ResponseEntity<>(carRepository.save(_car), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PutMapping(path = "{carId}")
-    public void updateCar(@PathVariable("carId") Long carId,
-            @RequestParam(required = false) String color) {
-        carService.updateCar(carId, color);
+    @DeleteMapping("/cars/{id}")
+    public ResponseEntity<HttpStatus> deleteCar(@PathVariable("id") long id) {
+        try {
+            carRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/cars")
+    public ResponseEntity<HttpStatus> deleteAllCars() {
+        try {
+            carRepository.deleteAll();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 }
