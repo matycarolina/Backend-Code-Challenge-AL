@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "api/v1/car")
+@RequestMapping(path = "/api/v1/car")
 public class CarController {
 
     private final CarService carService;
