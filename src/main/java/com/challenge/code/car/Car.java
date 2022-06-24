@@ -1,5 +1,6 @@
 package com.challenge.code.car;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,16 +9,20 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "cars")
 public class Car {
     @Id
-    @SequenceGenerator(name = "car_sequence", sequenceName = "car_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "car_sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "plate")
     private String plate;
+    @Column(name = "color")
     private String color;
+    @Column(name = "model")
     private String model;
+    @Column(name = "brand")
     private String brand;
+    @Column(name = "chassis")
     private String chassis;
 
     public Car() {
