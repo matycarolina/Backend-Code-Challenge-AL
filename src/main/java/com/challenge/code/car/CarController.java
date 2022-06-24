@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
-@RequestMapping("/api/v1/car")
+@RequestMapping(path = "/api/v1")
 public class CarController {
     @Autowired
     CarRepository carRepository;
@@ -57,11 +57,15 @@ public class CarController {
     }
 
     @PostMapping("/cars")
-    public ResponseEntity<Car> createCar(@RequestBody Car car) {
+    public ResponseEntity<Car> createCar(@RequestBody Car newCar) {
         try {
-            Car _car = carRepository
-                    .save(new Car(car.getPlate(), car.getColor(), car.getModel(), car.getBrand(), car.getChassis()));
-            return new ResponseEntity<>(_car, HttpStatus.CREATED);
+            Optional<Car> carOptional = carRepository.findByPlate(newCar.getPlate());
+        if (carOptional.isPresent()) {
+            throw new IllegalStateException("Placa ya existe");
+        }
+        carRepository
+                    .save(newCar);
+            return new ResponseEntity<>(newCar, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
