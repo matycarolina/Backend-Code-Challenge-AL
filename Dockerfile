@@ -12,4 +12,4 @@ WORKDIR /app
 
 COPY --from=MAVEN_BUILD /build/target/code-0.1.0.jar /app/
 
-ENTRYPOINT ["java", "-jar", "docker-boot-intro-0.1.0.jar"]
+ENTRYPOINT ["java", "-jar", "code-0.1.0.jar"]

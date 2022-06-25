@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path = "/api/v1")
 public class CarController {
@@ -56,15 +56,16 @@ public class CarController {
         }
     }
 
-    @PostMapping("/cars")
+    @PostMapping("/add")
     public ResponseEntity<Car> createCar(@RequestBody Car newCar) {
         try {
             Optional<Car> carOptional = carRepository.findByPlate(newCar.getPlate());
-        if (carOptional.isPresent()) {
-            throw new IllegalStateException("Placa ya existe");
-        }
-        carRepository
-                    .save(newCar);
+            if (carOptional.isPresent()) {
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            }
+
+            carRepository.save(newCar);
+            
             return new ResponseEntity<>(newCar, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
