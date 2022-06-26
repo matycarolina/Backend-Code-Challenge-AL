@@ -1,4 +1,4 @@
-package com.challenge.code.car;
+package com.challenge.code.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.challenge.code.models.Car;
+import com.challenge.code.repositories.CarRepository;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path = "/api/v1")
@@ -32,7 +35,7 @@ public class CarController {
 
             if (plate == null)
                 carRepository.findAll().forEach(cars::add);
-            else
+            else 
                 carRepository.findCarByPlate(plate).forEach(cars::add);
 
             if (cars.isEmpty()) {
